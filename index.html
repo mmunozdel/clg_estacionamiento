@@ -298,13 +298,12 @@ footer{border-top:1px solid var(--border);margin-top:32px;padding:16px 0}
 
 <script>
 // ═══════════════════════════════════════
-//  ⚙️  CONFIGURACIÓN
+//  ⚙️  CONFIGURACIÓN — edita solo esto
 // ═══════════════════════════════════════
-const SHEET_ID   = '1BSM_EEC-Apriz10PEHfxOkF69pKZfij8_kx6RjBzspM';
-const SHEET_NAME = 'Hoja1';
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS0w-V52hsLLO-G9nB5eUX1BedSlNhpyBYOoHKk6nmnUfZJVGr5pcPJjhXrNMixCbnYLXWmzansUUGK/pub?gid=0&single=true&output=csv';
+const PROXY     = 'https://corsproxy.io/?url=';
+const CSV_URL   = PROXY + encodeURIComponent(SHEET_CSV);
 // ═══════════════════════════════════════
-
-const CSV_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 let allData=[],filter='todos',sortCol='numero',sortAsc=true;
 
 /* reloj */
@@ -317,13 +316,12 @@ let allData=[],filter='todos',sortCol='numero',sortAsc=true;
 
 /* carga */
 async function loadData(){
-  if(SHEET_ID==='TU_SHEET_ID'){document.getElementById('config-banner').classList.add('show');render([]);updateStats([]);return;}
   document.getElementById('config-banner').classList.remove('show');
   const btn=document.getElementById('btn-reload');
   btn.disabled=true;btn.textContent='↻ Cargando…';
   showState('loading');
   try{
-    const res=await fetch(CSV_URL+'&t='+Date.now());
+    const res=await fetch(PROXY + encodeURIComponent(SHEET_CSV + '&t=' + Date.now()));
     if(!res.ok)throw new Error('HTTP '+res.status);
     allData=parseCSV(await res.text());
     render(filtered());updateStats(allData);
