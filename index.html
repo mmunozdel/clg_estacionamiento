@@ -670,6 +670,7 @@ footer a { color: #16a34a; text-decoration: none; }
         <th onclick="sortBy('estado')">Estado</th>
         <th onclick="sortBy('usuario')">Propietario</th>
         <th onclick="sortBy('patente')">Patente</th>
+        <th onclick="sortBy('vehiculo')">Vehículo</th>
         <th onclick="sortBy('torre')">Torre</th>
         <th onclick="sortBy('depto')">Depto.</th>
       </tr>
@@ -732,11 +733,12 @@ function parseCSV(txt){
     usuario: col(hdrs,['usuario','user','nombre','propietario','asignado']),
     patente: col(hdrs,['patente','placa','vehiculo','plate']),
     torre:   col(hdrs,['torre','block','bloque','edificio']),
-    depto:   col(hdrs,['depto','departamento','dpto','apto','apartamento','unidad']),
+    depto:    col(hdrs,['depto','departamento','dpto','apto','apartamento','unidad']),
+    vehiculo: col(hdrs,['vehiculo','auto','carro','modelo','marca','tipo']),
   };
   return lines.slice(1).map(l=>{
     const c=splitL(l);
-    return{ numero:cl(c[idx.numero]), estado:normE(cl(c[idx.estado])), usuario:cl(c[idx.usuario]), patente:cl(c[idx.patente]), torre:cl(c[idx.torre]), depto:cl(c[idx.depto]) };
+    return{ numero:cl(c[idx.numero]), estado:normE(cl(c[idx.estado])), usuario:cl(c[idx.usuario]), patente:cl(c[idx.patente]), torre:cl(c[idx.torre]), depto:cl(c[idx.depto]), vehiculo:cl(c[idx.vehiculo]) };
   }).filter(r=>r.numero||r.usuario);
 }
 function col(h,cands){ for(const c of cands){ const i=h.findIndex(x=>x.includes(c)); if(i>=0) return i; } return -1; }
@@ -763,7 +765,7 @@ function filtered(){
   const q=document.getElementById('search').value.toLowerCase();
   let d=[...allData];
   if(filter!=='todos') d=d.filter(r=>r.estado===filter);
-  if(q) d=d.filter(r=>(r.numero+r.usuario+r.patente+r.torre+r.depto).toLowerCase().includes(q));
+  if(q) d=d.filter(r=>(r.numero+r.usuario+r.patente+r.torre+r.depto+r.vehiculo).toLowerCase().includes(q));
   d.sort((a,b)=>{ const av=a[sortCol]||'',bv=b[sortCol]||''; return sortAsc?av.localeCompare(bv,'es',{numeric:true}):bv.localeCompare(av,'es',{numeric:true}); });
   return d;
 }
@@ -779,7 +781,7 @@ function setFilter(f,btn){
 function sortBy(c){
   if(sortCol===c) sortAsc=!sortAsc; else{ sortCol=c; sortAsc=true; }
   document.querySelectorAll('th').forEach(t=>t.classList.remove('asc','desc'));
-  ['numero','estado','usuario','patente','torre','depto'].forEach((col,i)=>{ if(col===c) document.querySelectorAll('th')[i].classList.add(sortAsc?'asc':'desc'); });
+  ['numero','estado','usuario','patente','vehiculo','torre','depto'].forEach((col,i)=>{ if(col===c) document.querySelectorAll('th')[i].classList.add(sortAsc?'asc':'desc'); });
   render(filtered());
 }
 
@@ -795,13 +797,14 @@ function render(data){
   document.getElementById('count-lbl').textContent=`${data.length} registro${data.length!==1?'s':''}`;
 
   /* tabla */
-  const emptyTr=`<tr class="state-row"><td colspan="6">Sin resultados para esta búsqueda 🔍</td></tr>`;
+  const emptyTr=`<tr class="state-row"><td colspan="7">Sin resultados para esta búsqueda 🔍</td></tr>`;
   document.getElementById('tbody').innerHTML=!data.length?emptyTr:data.map((r,i)=>`
     <tr style="animation:fadeUp .2s ${i*.02}s ease both">
       <td class="td-num">${esc(r.numero)||'—'}</td>
       <td><span class="${bCls(r.estado)}">${bLbl(r.estado)}</span></td>
       <td class="td-user ${r.usuario?'has':''}">${esc(r.usuario)||'—'}</td>
       <td><span class="td-pat ${r.patente?'has':''}">${esc(r.patente)||'—'}</span></td>
+      <td class="td-user ${r.vehiculo?'has':''}">${esc(r.vehiculo)||'—'}</td>
       <td class="td-torre">${esc(r.torre)||'—'}</td>
       <td class="td-depto ${r.depto?'has':''}">${esc(r.depto)||'—'}</td>
     </tr>`).join('');
@@ -816,6 +819,7 @@ function render(data){
         <div class="card-meta">
           ${r.torre?`<span class="card-torre">Torre ${esc(r.torre)}</span>`:''}
           ${r.depto?`<span class="card-depto">Dpto. ${esc(r.depto)}</span>`:''}
+          ${r.vehiculo?`<span class="card-depto">· ${esc(r.vehiculo)}</span>`:''}
           <span class="card-pat ${r.patente?'has':''}">${esc(r.patente)||'Sin patente'}</span>
         </div>
       </div>
@@ -824,8 +828,8 @@ function render(data){
 }
 
 function showState(type,msg=''){
-  const load=`<tr class="state-row"><td colspan="6"><div class="spinner"></div><br>Cargando datos…</td></tr>`;
-  const err =`<tr class="state-row"><td colspan="6">⚠️ No se pudieron cargar los datos<br><small style="color:var(--muted);font-weight:400">${esc(msg)}</small></td></tr>`;
+  const load=`<tr class="state-row"><td colspan="7"><div class="spinner"></div><br>Cargando datos…</td></tr>`;
+  const err =`<tr class="state-row"><td colspan="7">⚠️ No se pudieron cargar los datos<br><small style="color:var(--muted);font-weight:400">${esc(msg)}</small></td></tr>`;
   document.getElementById('tbody').innerHTML=type==='loading'?load:err;
   document.getElementById('cards-wrap').innerHTML=type==='loading'
     ?`<div class="state-card"><div class="spinner"></div><br>Cargando datos…</div>`
